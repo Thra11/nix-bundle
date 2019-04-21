@@ -48,7 +48,7 @@ in rec {
     .${nix-user-chroot'}/bin/nix-user-chroot -n ./nix ${nixUserChrootFlags} -- ${target}${run} $@
   '';
 
-  nix-bootstrap = { target, extraTargets ? [], run, nix-user-chroot' ? nix-user-chroot, nixUserChrootFlags ? "" }:
+  nix-bootstrap = { target, extraTargets ? [], run, nix-user-chroot' ? pkgsCross.armv7l-hf-multiplatform.nix-user-chroot, nixUserChrootFlags ? "" }:
     let
       script = makeStartup { inherit target nixUserChrootFlags nix-user-chroot' run; };
     in makebootstrap {
@@ -64,7 +64,7 @@ in rec {
 
   # special case adding path to the environment before launch
   nix-bootstrap-path = let
-    nix-user-chroot'' = targets: nix-user-chroot.overrideDerivation (o: {
+    nix-user-chroot'' = targets: pkgsCross.armv7l-hf-multiplatform.nix-user-chroot.overrideDerivation (o: {
       buildInputs = o.buildInputs ++ targets;
       makeFlags = o.makeFlags ++ [
         ''ENV_PATH="${stdenv.lib.makeBinPath targets}"''
