@@ -45,7 +45,13 @@ in rec {
   makeStartup = { target, nixUserChrootFlags, nix-user-chroot', run }:
   writeScript "startup" ''
     #!/bin/sh
-    .${nix-user-chroot'}/bin/nix-user-chroot -n ./nix ${nixUserChrootFlags} -- ${target}${run} $@
+    LD_PRELOAD="\
+    .${pkgsCross.armv7l-hf-multiplatform.buildPackages.gcc.cc.lib}/lib/libstdc++.so.6 \
+    .${pkgsCross.armv7l-hf-multiplatform.glibc}/lib/libm.so.6 \
+    .${pkgsCross.armv7l-hf-multiplatform.buildPackages.gcc.cc.lib}/lib/libgcc_s.so.1 \
+    .${pkgsCross.armv7l-hf-multiplatform.glibc}/lib/libc.so.6" \
+    .${pkgsCross.armv7l-hf-multiplatform.glibc}/lib/ld-linux-armhf.so.3 .${nix-user-chroot'}/bin/nix-user-chroot \
+    -n ./nix ${nixUserChrootFlags} -- ${target}${run} $@
   '';
 
   nix-bootstrap = { target, extraTargets ? [], run, nix-user-chroot' ? pkgsCross.armv7l-hf-multiplatform.nix-user-chroot, nixUserChrootFlags ? "" }:
